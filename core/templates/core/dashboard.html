@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - BookYourRide</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            color: #333;
+        }
+
+        header {
+            background: #071b45;
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            color: #ffcc00;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            color: #071b45;
+            margin-bottom: 8px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0001;
+            border-left: 5px solid #ffcc00;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            font-size: 28px;
+            font-weight: bold;
+            color: #071b45;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0001;
+            overflow-x: auto;
+        }
+
+        .section h2 {
+            color: #071b45;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #071b45;
+            color: white;
+        }
+
+        .confirmed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .cancelled {
+            color: red;
+            font-weight: bold;
+        }
+
+        .paid {
+            color: green;
+            font-weight: bold;
+        }
+
+        .pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .links {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .links a {
+            background: #ffcc00;
+            color: #071b45;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        @media(max-width: 600px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>BookYourRide</h1>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/booking/">Book Cab</a>
+        <a href="/my-bookings/">My Bookings</a>
+   <form method="POST" action="/logout/" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+    </nav>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>Welcome, {{ request.user.username }}!</h2>
+        <p>Here is your booking dashboard.</p>
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Total Bookings</h3>
+            <p>{{ total_bookings }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Confirmed Bookings</h3>
+            <p>{{ confirmed_bookings }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Cancelled Bookings</h3>
+            <p>{{ cancelled_bookings }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Paid Amount</h3>
+            <p>₹{{ total_paid }}</p>
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <h2>Recent Bookings</h2>
+
+        {% if recent_bookings %}
+
+        <table>
+            <tr>
+                <th>Pickup</th>
+                <th>Drop</th>
+                <th>Cab</th>
+                <th>Fare</th>
+                <th>Booking Status</th>
+                <th>Payment Status</th>
+            </tr>
+
+            {% for booking in recent_bookings %}
+            <tr>
+                <td>{{ booking.pickup }}</td>
+                <td>{{ booking.drop_location }}</td>
+                <td>{{ booking.cab_type }}</td>
+                <td>₹{{ booking.fare }}</td>
+
+                <td>
+                    {% if booking.status == 'Confirmed' %}
+                        <span class="confirmed">Confirmed</span>
+                    {% else %}
+                        <span class="cancelled">Cancelled</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if booking.payment_status == 'Paid' %}
+                        <span class="paid">Paid</span>
+                    {% else %}
+                        <span class="pending">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+            <p>You have not made any bookings yet.</p>
+        {% endif %}
+
+    </div>
+
+    <div class="links">
+        <a href="/booking/">Book a New Cab</a>
+        <a href="/my-bookings/">View All Bookings</a>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 BookYourRide | All Rights Reserved
+</footer>
+
+</body>
+</html>

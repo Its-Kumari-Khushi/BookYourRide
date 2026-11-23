@@ -1,0 +1,116 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookYourRide | Cab Services</title>
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="{% url 'home' %}" class="brand">
+        <span class="brand-icon">🚕</span>
+        <span>BookYourRide</span>
+    </a>
+
+    <div class="nav-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'booking' %}">Book a Cab</a>
+        <a href="{% url 'my_bookings' %}">My Bookings</a>
+        <a href="/dashboard/">Dashboard</a>
+        <form method="POST" action="/logout/" class="nav-logout">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+
+        {% if user.is_authenticated %}
+            <span class="tag">WELCOME TO BOOKYOURRIDE</span>
+            <h1>Welcome, <span>{{ user.username }}!</span></h1>
+        {% else %}
+            <span class="tag">YOUR RIDE, YOUR COMFORT</span>
+            <h1>Welcome to <span>Cab Services</span></h1>
+        {% endif %}
+
+        <p class="hero-subtitle">
+            Your Journey, Our Responsibility!
+        </p>
+
+        <p class="hero-description">
+            Book your cab easily and travel safely.
+            Enjoy comfortable rides at affordable prices.
+        </p>
+
+        <div class="buttons">
+            <a href="{% url 'booking' %}" class="btn">
+                Book a Cab →
+            </a>
+            <a href="{% url 'my_bookings' %}" class="btn secondary">
+                My Bookings
+            </a>
+        </div>
+
+        {% if not user.is_authenticated %}
+        <div class="auth-links">
+            <span>Already have an account?</span>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <div class="hero-image">
+        <div class="image-circle">
+           <img src="{% static 'core/images/car.png' %}"
+     alt="BookYourRide Car"
+     class="car-photo">
+        </div>
+        <div class="floating-card">
+            <span>⭐</span>
+            Safe & Comfortable Ride
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Safe & Secure</h3>
+        <p>Your safety is our priority.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Fast Booking</h3>
+        <p>Book your ride in a few clicks.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🎧</div>
+        <h3>24/7 Support</h3>
+        <p>We are always here to help.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🚖</div>
+        <h3>Comfortable Rides</h3>
+        <p>Enjoy every journey with us.</p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 BookYourRide | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>
+
+

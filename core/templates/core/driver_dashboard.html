@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Dashboard - BookYourRide</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #1d3557;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 8px #ccc;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #1d3557;
+            color: white;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #1d3557;
+            color: white;
+            padding: 9px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            background: #457b9d;
+        }
+
+        .availability-btn {
+            padding: 11px 18px;
+            font-weight: bold;
+        }
+
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+
+        .unavailable {
+            color: red;
+            font-weight: bold;
+        }
+
+        .verified {
+            color: green;
+            font-weight: bold;
+        }
+
+        .not-verified {
+            color: red;
+            font-weight: bold;
+        }
+
+        .empty {
+            color: #777;
+        }
+
+        .back {
+            color: #1d3557;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .message {
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Driver Dashboard</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- DRIVER PROFILE -->
+
+    <div class="card">
+
+        <h2>Welcome, {{ driver.full_name }}!</h2>
+
+        <p>
+            <b>Vehicle Number:</b>
+            {{ driver.vehicle_number }}
+        </p>
+
+        <p>
+            <b>Vehicle Type:</b>
+            {{ driver.vehicle_type }}
+        </p>
+
+        <p>
+            <b>Verification:</b>
+
+            {% if driver.is_verified %}
+                <span class="verified">Verified</span>
+            {% else %}
+                <span class="not-verified">Not Verified</span>
+            {% endif %}
+        </p>
+
+        <hr>
+
+        <!-- DRIVER AVAILABILITY -->
+
+        <h3>Driver Availability</h3>
+
+        <p>
+            <b>Current Status:</b>
+
+            {% if driver.is_available %}
+                <span class="available">Available</span>
+            {% else %}
+                <span class="unavailable">Not Available</span>
+            {% endif %}
+        </p>
+
+        {% if driver.is_verified %}
+
+            <form method="POST"
+                  action="{% url 'toggle_driver_availability' %}">
+
+                {% csrf_token %}
+
+                {% if driver.is_available %}
+
+                    <button type="submit" class="availability-btn"
+                            style="background: #dc3545;">
+                        Go Offline
+                    </button>
+
+                {% else %}
+
+                    <button type="submit" class="availability-btn"
+                            style="background: #198754;">
+                        Go Online
+                    </button>
+
+                {% endif %}
+
+            </form>
+
+        {% else %}
+
+            <p style="color: red;">
+                Your account is not verified yet.
+                Please contact admin.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+    <!-- ASSIGNED BOOKINGS -->
+
+    <div class="card">
+
+        <h2>My Assigned Bookings</h2>
+
+        {% if bookings %}
+
+        <table>
+
+            <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Pickup</th>
+                <th>Drop</th>
+                <th>Date</th>
+                <th>Fare</th>
+                <th>Current Status</th>
+                <th>Update Status</th>
+            </tr>
+
+            {% for booking in bookings %}
+
+            <tr>
+
+                <td>{{ booking.id }}</td>
+
+                <td>{{ booking.customer_name }}</td>
+
+                <td>{{ booking.pickup }}</td>
+
+                <td>{{ booking.drop_location }}</td>
+
+                <td>{{ booking.travel_date }}</td>
+
+                <td>₹{{ booking.fare }}</td>
+
+                <td>{{ booking.status }}</td>
+
+                <td>
+
+                    {% if booking.status != 'Completed' and booking.status != 'Cancelled' %}
+
+                    <form method="POST"
+                          action="{% url 'update_booking_status' booking.id %}">
+
+                        {% csrf_token %}
+
+                        <select name="status" required>
+
+                            {% if booking.status == 'Confirmed' %}
+                                <option value="Accepted">Accept Booking</option>
+                            {% elif booking.status == 'Accepted' %}
+                                <option value="In Progress">Start Ride</option>
+                            {% elif booking.status == 'In Progress' %}
+                                <option value="Completed">Complete Ride</option>
+                            {% endif %}
+
+                        </select>
+
+                        <br>
+
+                        <button type="submit">Update</button>
+
+                    </form>
+
+                    {% else %}
+
+                        No action available
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+            <p class="empty">No bookings assigned yet.</p>
+
+        {% endif %}
+
+    </div>
+
+    <p>
+        <a class="back" href="{% url 'home' %}">Back to Home</a>
+    </p>
+
+</div>
+
+</body>
+</html>

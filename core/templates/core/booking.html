@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Cab - BookYourRide</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+        }
+
+        header {
+            background: #071b45;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #ffcc00;
+            font-size: 32px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #0002;
+        }
+
+        h2 {
+            text-align: center;
+            color: #071b45;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 25px;
+            background: #ffcc00;
+            color: #071b45;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e6b800;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .hint {
+            color: #555;
+            font-size: 13px;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .fare-box {
+            background: #eef4ff;
+            border: 1px solid #b8ccec;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 22px;
+            color: #071b45;
+            line-height: 1.7;
+        }
+
+        .fare-box h3 {
+            margin-bottom: 8px;
+        }
+
+        .fare-amount {
+            font-size: 25px;
+            font-weight: bold;
+            color: #087b39;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>BookYourRide</h1>
+    <p>Safe Journey... Happy Journey...</p>
+</header>
+
+<div class="container">
+
+    <h2>Book Your Cab</h2>
+
+    {% if submitted %}
+
+        <div class="success">
+            <h3>Booking Successful!</h3>
+
+            <p>Thank you, {{ customer_name }}.</p>
+            <p>Pickup: {{ pickup }}</p>
+            <p>Drop: {{ drop }}</p>
+            <p>Trip Type: {{ trip_type }}</p>
+            <p>Journey Date: {{ travel_date }}</p>
+
+            {% if return_date %}
+                <p>Return Date: {{ return_date }}</p>
+            {% endif %}
+
+            <p>Time: {{ travel_time }}</p>
+            <p>Passengers: {{ passengers }}</p>
+            <p>Cab: {{ cab }}</p>
+            <p>Distance: {{ distance }} KM</p>
+            <p>Payment Method: {{ payment_method }}</p>
+            <p>Payment Status: Pending</p>
+
+            <h3>Estimated Fare: ₹{{ fare }}</h3>
+        </div>
+
+        <button type="button"
+        onclick="window.location.href=window.location.pathname">
+            Book Another Cab
+        </button>
+
+    {% else %}
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" id="bookingForm">
+            {% csrf_token %}
+
+            <label>Customer Name</label>
+            <input type="text"
+                   name="customer_name"
+                   placeholder="Enter your name"
+                   required>
+
+            <label>Pickup Location</label>
+            <input type="text"
+                   name="pickup"
+                   placeholder="Enter pickup location"
+                   required>
+
+            <label>Drop Location</label>
+            <input type="text"
+                   name="drop"
+                   placeholder="Enter drop location"
+                   required>
+
+            <label>Select Trip Type</label>
+            <select name="trip_type" id="trip_type" required>
+                <option value="One-way">One-way</option>
+                <option value="Round-trip">Round-trip</option>
+            </select>
+
+            <label>Journey Date</label>
+            <input type="date"
+                   name="travel_date"
+                   id="travel_date"
+                   required>
+
+            <div id="return_date_section" class="hidden">
+
+                <label>Return Date</label>
+                <input type="date"
+                       name="return_date"
+                       id="return_date">
+
+            </div>
+
+            <label>Journey Time</label>
+            <input type="time"
+                   name="travel_time"
+                   required>
+
+            <label>Number of Passengers</label>
+            <select name="passengers" required>
+                <option value="">Select passengers</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+
+            <label>Select Cab Type</label>
+
+            <select name="cab_type" id="cab_type" required>
+                <option value="">Choose your cab</option>
+
+                {% for item in pricings %}
+                    <option
+                        value="{{ item.cab_type }}"
+                        data-one-way-rate="{{ item.one_way_rate }}"
+                        data-round-trip-rate="{{ item.round_trip_rate }}">
+                        {{ item.cab_type }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+            <label for="distance" id="distance_label">
+                One-way Distance (KM)
+            </label>
+
+            <input type="number"
+                   name="distance"
+                   id="distance"
+                   min="0.01"
+                   step="0.01"
+                   placeholder="Enter one-way distance in KM"
+                   required>
+
+            <p class="hint" id="distance_hint">
+                Enter the total one-way distance from pickup to drop location.
+            </p>
+
+            <!-- LIVE FARE PREVIEW -->
+
+            <div class="fare-box">
+                <h3>Estimated Fare</h3>
+
+                <p id="fare_details">
+                    Select cab type and enter distance to calculate fare.
+                </p>
+
+                <p class="fare-amount" id="fare_amount">
+                    ₹0.00
+                </p>
+
+                <p class="hint">
+                    Final fare will be calculated using the saved cab pricing.
+                </p>
+            </div>
+
+            <label>Payment Method</label>
+
+            <select name="payment_method" required>
+                <option value="">Select Payment Method</option>
+                <option value="Cash on Pickup">Cash on Pickup</option>
+            </select>
+
+            <button type="submit">Book Now</button>
+
+        </form>
+
+    {% endif %}
+
+</div>
+
+<footer>
+    © 2026 BookYourRide | All Rights Reserved
+</footer>
+
+<script>
+
+    const tripType = document.getElementById('trip_type');
+    const returnSection = document.getElementById('return_date_section');
+    const returnDate = document.getElementById('return_date');
+    const travelDate = document.getElementById('travel_date');
+
+    const distanceLabel = document.getElementById('distance_label');
+    const distanceInput = document.getElementById('distance');
+    const distanceHint = document.getElementById('distance_hint');
+
+    const cabType = document.getElementById('cab_type');
+    const fareAmount = document.getElementById('fare_amount');
+    const fareDetails = document.getElementById('fare_details');
+
+    function updateBookingForm() {
+
+        if (!tripType) return;
+
+        if (tripType.value === 'Round-trip') {
+
+            returnSection.classList.remove('hidden');
+            returnDate.required = true;
+
+            distanceLabel.textContent =
+                'Total Round-trip Distance (Going + Return) KM';
+
+            distanceInput.placeholder =
+                'Enter total distance including return journey';
+
+            distanceHint.textContent =
+                'Enter the combined distance for both onward and return journeys.';
+
+        } else {
+
+            returnSection.classList.add('hidden');
+            returnDate.required = false;
+            returnDate.value = '';
+
+            distanceLabel.textContent = 'One-way Distance (KM)';
+
+            distanceInput.placeholder =
+                'Enter one-way distance in KM';
+
+            distanceHint.textContent =
+                'Enter the total one-way distance from pickup to drop location.';
+        }
+
+        calculateFare();
+    }
+
+    function calculateFare() {
+
+        if (!cabType || !distanceInput) return;
+
+        const selectedOption =
+            cabType.options[cabType.selectedIndex];
+
+        const distance = parseFloat(distanceInput.value);
+
+        if (!selectedOption || !selectedOption.value ||
+            !Number.isFinite(distance) || distance <= 0) {
+
+            fareAmount.textContent = '₹0.00';
+            fareDetails.textContent =
+                'Select cab type and enter distance to calculate fare.';
+            return;
+        }
+
+        let rate;
+
+        if (tripType.value === 'Round-trip') {
+            rate = parseFloat(
+                selectedOption.dataset.roundTripRate
+            );
+        } else {
+            rate = parseFloat(
+                selectedOption.dataset.oneWayRate
+            );
+        }
+
+        if (!Number.isFinite(rate)) {
+            fareAmount.textContent = 'Not available';
+            fareDetails.textContent =
+                'Pricing is not available for this cab.';
+            return;
+        }
+
+        const fare = distance * rate;
+
+        fareDetails.textContent =
+            distance + ' KM × ₹' + rate.toFixed(2) + ' per KM';
+
+        fareAmount.textContent =
+            '₹' + fare.toFixed(2);
+    }
+
+    if (tripType) {
+
+        travelDate.min = new Date().toLocaleDateString('en-CA');
+
+        tripType.addEventListener('change', updateBookingForm);
+
+        travelDate.addEventListener('change', function() {
+
+            returnDate.min = travelDate.value;
+
+            if (returnDate.value &&
+                returnDate.value < travelDate.value) {
+
+                returnDate.value = '';
+            }
+        });
+
+        returnDate.addEventListener('change', function() {
+
+            if (returnDate.value < travelDate.value) {
+
+                alert('Return date cannot be before journey date.');
+                returnDate.value = '';
+            }
+        });
+
+        cabType.addEventListener('change', calculateFare);
+        distanceInput.addEventListener('input', calculateFare);
+
+        updateBookingForm();
+    }
+
+</script>
+
+</body>
+</html>

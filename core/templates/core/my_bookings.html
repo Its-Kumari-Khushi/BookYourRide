@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - BookYourRide</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #071b45;
+        }
+
+        .booking-container {
+            max-width: 750px;
+            margin: 20px auto;
+        }
+
+        .filter-box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #ccc;
+        }
+
+        .filter-box input,
+        .filter-box select {
+            width: 100%;
+            padding: 11px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .filter-btn {
+            background: #071b45;
+            color: white;
+            padding: 11px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .clear-btn {
+            background: orange;
+            color: black;
+            padding: 11px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .booking-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #ccc;
+        }
+
+        .booking-card h3 {
+            color: #d99a00;
+        }
+
+        .booking-card p {
+            margin: 12px 0;
+        }
+
+        .fare {
+            color: green;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status {
+            font-weight: bold;
+            color: green;
+        }
+
+        .accepted {
+            color: #007bff;
+        }
+
+        .progress {
+            color: #d98b00;
+        }
+
+        .completed {
+            color: green;
+        }
+
+        .cancelled {
+            color: red;
+        }
+
+        .driver-box {
+            background: #eef4ff;
+            padding: 15px;
+            border-left: 4px solid #071b45;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .driver-box h3 {
+            color: #071b45;
+            margin-top: 0;
+        }
+
+        .cancel-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .back-btn {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            padding: 12px 25px;
+            background: orange;
+            color: black;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            background: #071b45;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+
+        .no-bookings {
+            text-align: center;
+            color: #555;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        .trip-badge {
+            display: inline-block;
+            background: #eef4ff;
+            color: #071b45;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>My Bookings</h1>
+
+    <div class="booking-container">
+
+        <!-- SEARCH AND FILTER -->
+
+        <div class="filter-box">
+
+            <h3>Search & Filter Bookings</h3>
+
+            <form method="GET">
+
+                <label>Search Pickup / Drop Location</label>
+
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Enter pickup or drop location"
+                    value="{{ search }}"
+                >
+
+                <label>Filter by Cab Type</label>
+
+                <select name="cab_type">
+                    <option value="">All Cab Types</option>
+
+                    <option value="Hatchback"
+                        {% if selected_cab == 'Hatchback' %}selected{% endif %}>
+                        Hatchback
+                    </option>
+
+                    <option value="Sedan"
+                        {% if selected_cab == 'Sedan' %}selected{% endif %}>
+                        Sedan
+                    </option>
+
+                    <option value="SUV"
+                        {% if selected_cab == 'SUV' %}selected{% endif %}>
+                        SUV
+                    </option>
+                </select>
+
+                <label>Filter by Booking Status</label>
+
+                <select name="status">
+
+                    <option value="">All Status</option>
+
+                    <option value="Confirmed"
+                        {% if selected_status == 'Confirmed' %}selected{% endif %}>
+                        Confirmed
+                    </option>
+
+                    <option value="Accepted"
+                        {% if selected_status == 'Accepted' %}selected{% endif %}>
+                        Accepted
+                    </option>
+
+                    <option value="In Progress"
+                        {% if selected_status == 'In Progress' %}selected{% endif %}>
+                        In Progress
+                    </option>
+
+                    <option value="Completed"
+                        {% if selected_status == 'Completed' %}selected{% endif %}>
+                        Completed
+                    </option>
+
+                    <option value="Cancelled"
+                        {% if selected_status == 'Cancelled' %}selected{% endif %}>
+                        Cancelled
+                    </option>
+
+                </select>
+
+                <button type="submit" class="filter-btn">
+                    Apply Filter
+                </button>
+
+                <a href="{% url 'my_bookings' %}" class="clear-btn">
+                    Clear Filters
+                </a>
+
+            </form>
+
+        </div>
+
+        <!-- BOOKING DETAILS -->
+
+        {% if bookings %}
+
+            {% for booking in bookings %}
+
+                <div class="booking-card">
+
+                    <h3>Booking Details #{{ booking.id }}</h3>
+
+                    <p>
+                        <b>Customer Name:</b>
+                        {{ booking.customer_name }}
+                    </p>
+
+                    <p>
+                        <b>Pickup Location:</b>
+                        {{ booking.pickup }}
+                    </p>
+
+                    <p>
+                        <b>Drop Location:</b>
+                        {{ booking.drop_location }}
+                    </p>
+
+                    <!-- NEW: TRIP TYPE -->
+
+                    <p>
+                        <b>Trip Type:</b>
+                        <span class="trip-badge">
+                            {{ booking.trip_type|default:"One-way" }}
+                        </span>
+                    </p>
+
+                    <p>
+                        <b>Journey Date:</b>
+                        {{ booking.travel_date }}
+                    </p>
+
+                    <!-- NEW: RETURN DATE -->
+
+                    {% if booking.trip_type == 'Round-trip' and booking.return_date %}
+
+                        <p>
+                            <b>Return Date:</b>
+                            {{ booking.return_date }}
+                        </p>
+
+                    {% endif %}
+
+                    <p>
+                        <b>Journey Time:</b>
+                        {{ booking.travel_time|default:"Not specified" }}
+                    </p>
+
+                    <p>
+                        <b>Passengers:</b>
+                        {{ booking.passengers }}
+                    </p>
+
+                    <p>
+                        <b>Cab Type:</b>
+                        {{ booking.cab_type }}
+                    </p>
+
+                    <p>
+                        <b>Distance:</b>
+                        {{ booking.distance }} KM
+                    </p>
+
+                    <p class="fare">
+                        Estimated Fare: ₹{{ booking.fare }}
+                    </p>
+
+                    <p>
+                        <b>Payment Method:</b>
+                        {{ booking.payment_method }}
+                    </p>
+
+                    <p>
+                        <b>Payment Status:</b>
+
+                        {% if booking.payment_status == 'Pending' %}
+                            <span style="color: orange; font-weight: bold;">
+                                Pending
+                            </span>
+                        {% elif booking.payment_status == 'Paid' %}
+                            <span style="color: green; font-weight: bold;">
+                                Paid
+                            </span>
+                        {% else %}
+                            {{ booking.payment_status }}
+                        {% endif %}
+                    </p>
+
+                    <!-- BOOKING STATUS -->
+
+                    <p>
+                        <b>Booking Status:</b>
+
+                        {% if booking.status == 'Confirmed' %}
+                            <span class="status">Confirmed</span>
+
+                        {% elif booking.status == 'Accepted' %}
+                            <span class="status accepted">Accepted</span>
+
+                        {% elif booking.status == 'In Progress' %}
+                            <span class="status progress">Ride In Progress</span>
+
+                        {% elif booking.status == 'Completed' %}
+                            <span class="status completed">Completed</span>
+
+                        {% elif booking.status == 'Cancelled' %}
+                            <span class="status cancelled">Cancelled</span>
+
+                        {% else %}
+                            <span class="status">{{ booking.status }}</span>
+                        {% endif %}
+                    </p>
+
+                    <!-- DRIVER DETAILS -->
+
+                    {% if booking.driver %}
+
+                        <div class="driver-box">
+
+                            <h3>Driver Details</h3>
+
+                            <p>
+                                <b>Driver Name:</b>
+                                {{ booking.driver.full_name }}
+                            </p>
+
+                            <p>
+                                <b>Mobile Number:</b>
+                                {{ booking.driver.mobile_number }}
+                            </p>
+
+                            <p>
+                                <b>Vehicle Number:</b>
+                                {{ booking.driver.vehicle_number }}
+                            </p>
+
+                            <p>
+                                <b>Vehicle Type:</b>
+                                {{ booking.driver.vehicle_type }}
+                            </p>
+
+                        </div>
+
+                    {% else %}
+
+                        <p style="color: #777;">
+                            <b>Driver:</b> Not assigned yet.
+                        </p>
+
+                    {% endif %}
+
+                    <!-- EDIT AND CANCEL BUTTONS -->
+
+                    {% if booking.status == 'Confirmed' %}
+
+                        <a href="{% url 'edit_booking' booking.id %}"
+                           class="edit-btn">
+                            Edit Booking
+                        </a>
+
+                        <form method="POST"
+                              action="{% url 'cancel_booking' booking.id %}"
+                              onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+
+                            {% csrf_token %}
+
+                            <button type="submit" class="cancel-btn">
+                                Cancel Booking
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="no-bookings">
+                <h3>No bookings found!</h3>
+                <p>Try changing your search or filters.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <a href="/" class="back-btn">Back to Home</a>
+
+</body>
+</html>
+

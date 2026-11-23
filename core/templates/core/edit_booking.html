@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Booking - BookYourRide</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px #0002;
+        }
+
+        h1 {
+            text-align: center;
+            color: #071b45;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+            background: #ffcc00;
+            color: #071b45;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #071b45;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Edit Your Booking</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Pickup Location</label>
+        <input type="text" name="pickup"
+               value="{{ booking.pickup }}" required>
+
+        <label>Drop Location</label>
+        <input type="text" name="drop"
+               value="{{ booking.drop_location }}" required>
+
+        <label>Trip Type</label>
+        <select name="trip_type" id="trip_type" required>
+            <option value="One-way"
+                {% if booking.trip_type == 'One-way' %}selected{% endif %}>
+                One-way
+            </option>
+
+            <option value="Round-trip"
+                {% if booking.trip_type == 'Round-trip' %}selected{% endif %}>
+                Round-trip
+            </option>
+        </select>
+
+        <div id="return_date_box">
+            <label>Return Date</label>
+            <input type="date" name="return_date" id="return_date"
+                   value="{{ booking.return_date|date:'Y-m-d' }}">
+        </div>
+
+        <label>Travel Date</label>
+        <input type="date" name="travel_date" id="travel_date"
+               value="{{ booking.travel_date|date:'Y-m-d' }}" required>
+
+        <label>Travel Time</label>
+        <input type="time" name="travel_time"
+               value="{{ booking.travel_time|time:'H:i' }}">
+
+        <label>Passengers</label>
+        <input type="number" name="passengers"
+               value="{{ booking.passengers }}" min="1" required>
+
+        <label>Cab Type</label>
+        <select name="cab_type" required>
+            <option value="Hatchback"
+                {% if booking.cab_type == 'Hatchback' %}selected{% endif %}>
+                Hatchback
+            </option>
+
+            <option value="Sedan"
+                {% if booking.cab_type == 'Sedan' %}selected{% endif %}>
+                Sedan
+            </option>
+
+            <option value="SUV"
+                {% if booking.cab_type == 'SUV' %}selected{% endif %}>
+                SUV
+            </option>
+        </select>
+
+        <button type="submit">Update Booking</button>
+    </form>
+
+    <a href="/my-bookings/" class="back">Back to My Bookings</a>
+
+</div>
+
+<script>
+    const tripType = document.getElementById("trip_type");
+    const returnBox = document.getElementById("return_date_box");
+    const returnDate = document.getElementById("return_date");
+    const travelDate = document.getElementById("travel_date");
+
+    function toggleReturnDate() {
+        if (tripType.value === "Round-trip") {
+            returnBox.style.display = "block";
+            returnDate.required = true;
+        } else {
+            returnBox.style.display = "none";
+            returnDate.required = false;
+            returnDate.value = "";
+        }
+
+        returnDate.min = travelDate.value;
+    }
+
+    travelDate.addEventListener("change", function () {
+        returnDate.min = travelDate.value;
+    });
+
+    tripType.addEventListener("change", toggleReturnDate);
+
+    toggleReturnDate();
+</script>
+
+</body>
+</html>
+
