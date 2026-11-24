@@ -2,11 +2,9 @@ from django.contrib import admin
 from .models import Booking, Driver, Pricing
 
 
-
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-
-       list_display = (
+    list_display = (
         'id',
         'customer_name',
         'pickup',
@@ -34,6 +32,7 @@ class BookingAdmin(admin.ModelAdmin):
         'pickup',
         'drop_location',
     )
+
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
