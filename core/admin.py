@@ -6,7 +6,7 @@ from .models import Booking, Driver, Pricing
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
 
-    list_display = (
+       list_display = (
         'id',
         'customer_name',
         'pickup',
@@ -18,6 +18,8 @@ class BookingAdmin(admin.ModelAdmin):
         'payment_method',
         'payment_status',
     )
+
+    list_display_links = ('customer_name',)
 
     list_filter = (
         'status',
